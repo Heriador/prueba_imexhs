@@ -1,0 +1,37 @@
+# Ignorar archivos de entorno virtual
+venv/
+env/
+ENV/
+.venv/
+.ENV/
+
+# Ignorar archivos de configuración de entorno
+*.env
+*.venv
+*.envrc
+.envrc
+*.env.bak
+.env.bak
+
+# Ignorar dependencias instaladas
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Ignorar archivos de configuración de IDE
+.vscode/
+.idea/
+
+# Ignorar archivos de registro
+*.log
+
+# Ignorar archivos de caché
+*.cache
+*.pyc
+*.pyo
+*.pyd
+
+# Ignorar archivos de distribución
+dist/
+build/
+*.egg-info/
