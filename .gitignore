@@ -31,6 +31,8 @@ __pycache__/
 *.pyo
 *.pyd
 
+*.txt
+
 # Ignorar archivos de distribución
 dist/
 build/

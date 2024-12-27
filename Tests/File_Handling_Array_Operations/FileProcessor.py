@@ -1,6 +1,9 @@
 import logging
 import os
 from datetime import datetime
+import csv
+from collections import Counter
+from errors import IncorrectFileFormatError
 
 class FileProcessor:
     def __init__(self,base_path):
@@ -59,4 +62,93 @@ class FileProcessor:
             logging.error(f'Error: {e}')
             return None
     
+    def read_csv(self, filename, report_path = None, summary = False):
+        print("CSV Analysis\n")
+        try:
+            #Reading the csv file using the csv library
+            file = open(os.path.join(self.__base_path,filename), 'r')
+            csv_reader = csv.reader(file)
+
+            if(not report_path.endswith('.txt')):
+                raise IncorrectFileFormatError()
+            
+            #Creating a report file if the report_path is provided
+            report_path = open(report_path, 'w') if report_path else None
+
+
+            #Extracting the headers and the data from the csv file
+            data = list(csv_reader)
+            headers = data[0]
+
+            #Creating a list to store the average and standard deviation of the numeric columns
+            average = [0.0 for _ in range(len(headers))]
+            std = [0.0 for _ in range(len(headers))]
+
+            #Calculating the average and standard deviation of the numeric columns
+
+            #Iterating through the columns
+            for i in range(len(headers)):
+                #Verifying if the column is numeric
+                if not data[1][i].isnumeric():
+                    continue
+
+                #Extracting the column and calculating the average and standard deviation
+                column = [float(row[i]) for row in data[1:]]
+                average[i] = sum(column)/len(column)
+                std[i] = (sum([(x-average[i])**2 for x in column])/len(column))**0.5
+
+            analysis_headers = f"Numeric Columns"
+
+            #Printing the number of columns and the columns in the csv file, as well as the average and standard deviation of the numeric columns
+            print(f"Number of columns: {len(headers)} ")
+            print(f"Columns: {headers}")
+            print(f"Rows: {len(data)-1}")
+            print("\n"+analysis_headers)
+
+            #if report_path is provided, writing the same information to the report file
+            if report_path:
+                report_path.write(analysis_headers+'\n')
+
+            for i in range(len(headers)):
+                if(average[i] == 0):
+                    continue
+
+                analysis_message = f"   - {headers[i]}: Average = {round(average[i],4):.2f}, Std Dev = {round(std[i],4):.2f}"
+                
+                #if report_path is provided, writing the average and standard deviation of the numeric columns to the report file
+                if report_path:
+                    report_path.write(analysis_message+'\n')
+
+                #Printing the average and standard deviation of the numeric columns
+                print(analysis_message)
+            
+            if summary:
+                self.__print_non_numeric_summary(headers, data)
+
+            if report_path:
+                print(f"\nReport written to {os.path.relpath(report_path.name)}")
+                report_path.close()
+
+            print("\n")
+
+        except FileNotFoundError as e:
+            logging.error(f'File not found: {e}')
+            return
+        except Exception as e:
+            logging.error(f'Error: {e}')
+            return None
     
+    def __print_non_numeric_summary(self, headers, data):
+        print("\nNon-numeric columns summary:")
+        non_numeric_columns = {}
+
+        for i in range(len(headers)):
+            if not data[1][i].isnumeric():
+                non_numeric_columns[headers[i]] = [row[i] for row in data[1:]]
+        
+        for header, column in non_numeric_columns.items():
+            counter = Counter(column)
+            
+            unique_values = len(counter.keys())
+            print(f'   - {header}: Unique values = {unique_values}')
+            
