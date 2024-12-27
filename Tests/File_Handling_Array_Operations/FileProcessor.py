@@ -3,8 +3,10 @@ import os
 from datetime import datetime
 import csv
 from collections import Counter
-from errors import IncorrectFileFormatError
-
+from exceptions import IncorrectFileFormatException
+import pydicom
+import matplotlib.pyplot as plt
+import numpy as np
 class FileProcessor:
     def __init__(self,base_path):
         self.__base_path = base_path
@@ -70,7 +72,7 @@ class FileProcessor:
             csv_reader = csv.reader(file)
 
             if(not report_path.endswith('.txt')):
-                raise IncorrectFileFormatError()
+                raise IncorrectFileFormatException()
             
             #Creating a report file if the report_path is provided
             report_path = open(report_path, 'w') if report_path else None
@@ -148,7 +150,68 @@ class FileProcessor:
         
         for header, column in non_numeric_columns.items():
             counter = Counter(column)
-            
+
             unique_values = len(counter.keys())
             print(f'   - {header}: Unique values = {unique_values}')
             
+    def read_dicom(self,filename,tags = [], extract_image = False,extract_with_mean = True):
+        file_path = os.path.join(self.__base_path,filename)
+        print("DICOM Analysis:\n")
+        try:
+            if not filename.endswith('.dcm'):
+                raise IncorrectFileFormatException()
+            
+            file_dicom = pydicom.dcmread(file_path)
+
+            #Printing the patient name, study date and modality of the DICOM file
+            print(f"Patient Name: {file_dicom.PatientName}")
+
+            #Converting the study date to a readable format
+            study_date = datetime.strptime(file_dicom.StudyDate, "%Y%m%d")
+            print(f"Study date {study_date.strftime('%d/%m/%Y')}")
+            print(f"Modality: {file_dicom.Modality}")
+
+            #Printing the additional tags if they are provided
+            if len(tags) > 0:
+                for tag in tags:
+                    element = file_dicom.get(tag, None)
+                    
+                    print(f'Tag {hex(tag[0])}, {hex(tag[1])} = {element.name}: {element.value}')
+            if extract_image:
+                #Extracting the pixel data from the DICOM file
+                image_path = file_path.replace('.dcm','.png')
+                self.__Dicom_to_image(file_dicom, image_path,extract_with_mean)
+
+                
+        except FileNotFoundError as e:
+            logging.error(f'File not found: {e}')
+            return
+        except Exception as e:
+            logging.error(f'Error: {e}')
+            return None
+        
+    def __Dicom_to_image(self, file_dicom, image_path, extract_with_mean):
+        pixel_data = file_dicom.pixel_array.astype(float)
+        rescaled_image = (np.maximum(pixel_data,0)/pixel_data.max())*255 #Rescaling the pixel data to 0-255 float
+        final_image = np.uint8(rescaled_image) #Converting the pixel data to uint8
+        
+        #Validating if the DICOM file is a multiframe file
+        if file_dicom.NumberOfFrames:
+            num_frames = file_dicom.NumberOfFrames
+
+            #Convert the multiframe image to a 2D image by taking the mean of the frames in the image
+            if extract_with_mean:
+                mean_image = np.mean(final_image, axis=0)
+                plt.imsave(image_path.replace('.png','_mean.png'),mean_image, cmap='gray')
+            else:
+                #Extracting the frames from the multiframe image and saving them as separate images
+                for i in range(num_frames):
+                    sub_image_path = image_path.replace('.png',f'_frame_{i+1}.png')
+                    plt.imsave(sub_image_path,final_image[i], cmap='gray')
+                
+                image_path = image_path.replace('.png',f'_frame_*.png')
+        else:
+            #Saving the 2D image to a PNG file
+            plt.imsave(image_path, final_image, cmap='gray')
+
+        print(f"Extracted image saved to {os.path.relpath(image_path)}\n")
