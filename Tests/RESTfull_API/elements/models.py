@@ -26,11 +26,10 @@ class Device(models.Model):
 
 class Element(models.Model):
   
-    device_id = models.OneToOneField(
+    device = models.OneToOneField(
         Device,
         on_delete=models.CASCADE,
-        verbose_name='Device ID',
-        blank=False
+        related_name='source_device',
     )
     average_before_normalization = models.FloatField(
         verbose_name='Average Before Normalization',
