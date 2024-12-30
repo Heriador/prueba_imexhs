@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { UploadImageService } from 'src/app/services/upload-image/upload-image.service';
 
 @Component({
   selector: 'app-upload-calculate',
@@ -10,7 +11,13 @@ export class UploadCalculateComponent implements OnInit {
 
   imageSrc: string | ArrayBuffer | null = null;
 
-  constructor() { }
+  constructor(
+    private uploadImageService: UploadImageService
+  ) {
+    this.uploadImageService.getBinaryImage().subscribe(binaryImage => {
+      this.imageSrc = binaryImage;
+    });
+  }
 
   ngOnInit(): void {
   }
@@ -19,15 +26,8 @@ export class UploadCalculateComponent implements OnInit {
     const file = (event.target as HTMLInputElement).files?.[0];
   
     if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        this.imageSrc = reader.result;
-
-      };
-      reader.readAsDataURL(file);
+      this.uploadImageService.receiveImage(file);
     }
   }
 
-
-  
 }
