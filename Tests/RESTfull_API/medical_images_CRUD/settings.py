@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'drf_standardized_errors',
     'corsheaders',
     'elements'
 ]
@@ -130,6 +131,13 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+REST_FRAMEWORK = {
+    "EXCEPTION_HANDLER": "drf_standardized_errors.handler.exception_handler",
+    'NON_FIELD_ERRORS_KEY': 'errors',
+}
+
+DRF_STANDARDIZED_ERRORS = {"ENABLE_IN_DEBUG_FOR_UNHANDLED_EXCEPTIONS": True}
 
 
 LOGGING = {

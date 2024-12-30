@@ -4,6 +4,7 @@ cycler==0.12.1
 Django==5.1.4
 django-cors-headers==4.6.0
 djangorestframework==3.15.2
+drf-standardized-errors==0.14.1
 fonttools==4.55.3
 kiwisolver==1.4.8
 matplotlib==3.9.2
