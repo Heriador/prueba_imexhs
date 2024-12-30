@@ -110,6 +110,9 @@ class ElementViewSet(viewsets.ModelViewSet):
         device = instance.device
         old_device_id = device.id
 
+        if len(device_data) == 0:
+            return Response({"message": "No data to update"}, status=status.HTTP_400_BAD_REQUEST)
+
         # update device id if passed in the request
         if 'id'in device_data:
             device.id = device_data['id']
