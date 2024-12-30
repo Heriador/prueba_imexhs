@@ -8,7 +8,8 @@
         <input type="file" (change)="onFileChange($event)" #fileInput style="display: none" />
     
         <div class="image-container">
-            <img [src]="imageSrc" alt="image" class="image" />
+            <img *ngIf="!drawImage" [src]="imageSrc" alt="image" class="image" />
+            <img *ngIf="drawImage" [src]="drawImage" alt="image" class="image" />
         </div>
     </div>
 
@@ -24,10 +25,10 @@
                 [(ngModel)]="number_points_generate"
             ></mat-slider>
         </div>
-        <button mat-raised-button color="primary" >Calculate</button>  
+        <button mat-raised-button color="primary" [disabled]="imageSrc === null || number_points_generate === 0" (click)="calculateArea()" >Calculate</button>  
         <div class="estimated-result">
             <h2>Estimated Area of the Stain: </h2>
-            <p>{{ estimatedArea }} M^2</p>
+            <p>{{ estimatedArea | number: '1.2-3' }}</p>
         </div>
     </div>
     

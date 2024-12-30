@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { UploadImageService } from 'src/app/services/upload-image/upload-image.service';
+import { Point } from 'src/app/interfaces/point.interface';
+import { UploadCalculateService } from 'src/app/services/upload-calculate/upload-calculate.service';
 
 @Component({
   selector: 'app-upload-calculate',
@@ -10,12 +11,13 @@ import { UploadImageService } from 'src/app/services/upload-image/upload-image.s
 export class UploadCalculateComponent implements OnInit {
 
   imageSrc: string | ArrayBuffer | null = null;
+  drawImage: string | ArrayBuffer | null = null;
   imageDimensions: { width: number, height: number } = { width: 0, height: 0 };
   number_points_generate: number = 0;
   estimatedArea: number = 0;
 
   constructor(
-    private uploadImageService: UploadImageService
+    private uploadImageService: UploadCalculateService
   ) {
     this.uploadImageService.getBinaryImage().subscribe(binaryImage => {
       this.imageSrc = binaryImage;
@@ -34,6 +36,45 @@ export class UploadCalculateComponent implements OnInit {
     if (file) {
       this.uploadImageService.receiveImage(file);
     }
+  }
+
+  calculateArea(){
+    if(!this.imageSrc)
+      return;
+
+    let points: Point[] = []
+
+    this.uploadImageService.generateRandomPoints(this.number_points_generate).subscribe({
+      next: (pointsGenerated) => {
+        points = pointsGenerated;
+      },
+      error: (error) => {
+        console.error(error);
+      }
+    });
+    console.log(points)
+
+    this.uploadImageService.drawPointsOnImage(points, this.imageSrc.toString()).subscribe({
+      next: (binaryImageWithPoints) => {
+        this.drawImage = binaryImageWithPoints
+      },
+      error: (error) => {
+        console.error(error);
+      }
+    });
+
+    this.uploadImageService.countPointsInsideStain(points).subscribe({
+      next: (pointsInsideStain) => {
+        console.log(pointsInsideStain);
+        this.estimatedArea = (pointsInsideStain / this.number_points_generate) * this.imageDimensions.width * this.imageDimensions.height;
+
+      },
+      error: (error) => {
+        console.error(error);
+      }
+    });
+
+
   }
 
 }
