@@ -42,7 +42,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'drf_standardized_errors',
     'corsheaders',
-    'elements'
+    'elements',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
@@ -135,6 +136,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 REST_FRAMEWORK = {
     "EXCEPTION_HANDLER": "drf_standardized_errors.handler.exception_handler",
     'NON_FIELD_ERRORS_KEY': 'errors',
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
 }
 
 DRF_STANDARDIZED_ERRORS = {"ENABLE_IN_DEBUG_FOR_UNHANDLED_EXCEPTIONS": True}

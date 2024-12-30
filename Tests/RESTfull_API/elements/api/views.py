@@ -1,17 +1,21 @@
 from rest_framework.response import Response
-from rest_framework import status, viewsets
-from elements.models import Device
+from rest_framework import status, viewsets, generics
+from elements.models import Device, Element
 from .serializer import ElementSerializer, DeviceSerializer
+from .filters import ElementFilter
+from django_filters.rest_framework import DjangoFilterBackend
 import logging
 
 logger = logging.getLogger('django')
 logger.addHandler('file')     
 
-
 class ElementViewSet(viewsets.ModelViewSet):
-    queryset = Device.objects.all()
-    serializer_class = DeviceSerializer
-    http_method_names = ['get', 'post', 'put', 'delete']
+    queryset = Element.objects.all()
+    serializer_class = ElementSerializer
+    http_method_names = ['get', 'post', 'put', 'patch' ,'delete']
+    filterset_class = ElementFilter
+    filter_backends = [DjangoFilterBackend]
+    lookup_field = 'device__id'
 
     def create(self, request, *args, **kwargs):
         data = dict(request.data)
@@ -20,12 +24,12 @@ class ElementViewSet(viewsets.ModelViewSet):
 
             for device_data in data.values():
                 data_device = self.__transform_element_data(device_data)
-                serializer = self.get_serializer(data=data_device)
+                serializer = DeviceSerializer(data=data_device)
 
                 if serializer.is_valid():
                     serializer.save()
                     element_data = self.__get_normalized_data(serializer.data)
-                    element_serializer = ElementSerializer(data=element_data)
+                    element_serializer = self.get_serializer(data=element_data)
 
                     if element_serializer.is_valid():
                         element_serializer.save()
@@ -44,7 +48,26 @@ class ElementViewSet(viewsets.ModelViewSet):
         except Exception as e:
             logger.error(f"Error: {e} ")
             return Response(e['message'])
-        
+
+    def list(self, request, *args, **kwargs):
+        logger.info(f"Request method: {request.method}, Request path: {request.path}, Request body: {request.body}")
+
+        queryset = self.filter_queryset(self.get_queryset())
+
+        serializer = self.get_serializer(queryset, many=True)
+
+
+        logger.info(f"List all elements: {serializer.data}")
+        return Response(serializer.data)
+    
+    def retrieve(self, request, *args, **kwargs):
+        logger.info(f"Request method: {request.method}, Request path: {request.path}, Request body: {request.body}")
+
+        element = self.get_object()
+        serializer = self.get_serializer(element)
+        logger.info(f"Response element: {serializer.data}")
+        return Response(serializer.data)
+    
     def __transform_element_data(self,data):
         
         device = dict()
