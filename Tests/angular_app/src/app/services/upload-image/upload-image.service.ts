@@ -7,7 +7,9 @@ import { Observable, Subject } from 'rxjs';
 export class UploadImageService {
 
   private binaryImage: Subject<string | ArrayBuffer | null> = new Subject<string | ArrayBuffer | null>();
+  private imageDimensions: Subject<{ width: number, height: number }> = new Subject<{ width: number, height: number }>();
 
+  public $imageDimensions = this.imageDimensions.asObservable();
 
   constructor() { }
 
@@ -20,6 +22,7 @@ export class UploadImageService {
       img.onload = () => {
        const result = this.convertToBinaryImage(img);
        this.binaryImage.next(result);
+       this.imageDimensions.next({ width: img.width, height: img.height });
       };
     };
     reader.readAsDataURL(image);
