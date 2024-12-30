@@ -1,6 +1,7 @@
 from rest_framework.response import Response
-from rest_framework import status, viewsets, generics
-from elements.models import Device, Element
+from rest_framework import status, viewsets
+from elements.models import Element
+from django.http import Http404
 from .serializer import ElementSerializer, DeviceSerializer
 from .filters import ElementFilter
 from django_filters.rest_framework import DjangoFilterBackend
@@ -68,6 +69,54 @@ class ElementViewSet(viewsets.ModelViewSet):
         logger.info(f"Response element: {serializer.data}")
         return Response(serializer.data)
     
+    def destroy(self, request, *args, **kwargs):
+        
+        logger.info(f"Request method: {request.method}, Request path: {request.path}, Request body: {request.body}")
+
+
+        instance = self.get_object()
+        device = instance.device
+        id = device.id
+
+        instance.delete()
+        device.delete()
+
+        logger.info(f"Deleted element: {instance}")
+        return Response({"message": f"element {id} deleted successfully"},status=status.HTTP_200_OK)
+        
+        
+    def update(self, request, *args, **kwargs):
+        logger.info(f"Request method: {request.method}, Request path: {request.path}, Request body: {request.body}")
+
+        instance = self.get_object()
+        device_data = request.data.get('device', {})
+        device = instance.device
+        old_device_id = device.id
+
+
+        if 'id'in device_data:
+            device.id = device_data['id']
+
+        if 'device_name' in device_data:
+            device.device_name = device_data['device_name']
+
+        device.save()
+        Element.objects.filter(device=old_device_id).update(device=device_data['id'])
+
+        
+        
+        
+        serializer = self.get_serializer(instance)
+
+        logger.info(f"Updated element: {serializer.data}")
+    
+        return Response(serializer.data,status=status.HTTP_200_OK)
+    
+        
+    def partial_update(self, request, *args, **kwargs):
+        kwargs['partial'] = True
+        return self.update(request, *args, **kwargs)
+ 
     def __transform_element_data(self,data):
         
         device = dict()
