@@ -6,7 +6,8 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatButtonModule } from '@angular/material/button'
 import { MatIconModule } from '@angular/material/icon';
 import { UploadCalculateComponent } from './components/upload-calculate/upload-calculate.component'
-
+import { MatSliderModule } from '@angular/material/slider'
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -18,7 +19,9 @@ import { UploadCalculateComponent } from './components/upload-calculate/upload-c
     DashboardRoutingModule,
     MatTabsModule,
     MatButtonModule,
-    MatIconModule
+    MatIconModule,
+    MatSliderModule,
+    FormsModule
   ]
 })
 export class DashboardModule { }

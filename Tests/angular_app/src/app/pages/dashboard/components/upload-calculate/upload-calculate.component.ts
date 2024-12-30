@@ -10,6 +10,9 @@ import { UploadImageService } from 'src/app/services/upload-image/upload-image.s
 export class UploadCalculateComponent implements OnInit {
 
   imageSrc: string | ArrayBuffer | null = null;
+  imageDimensions: { width: number, height: number } = { width: 0, height: 0 };
+  number_points_generate: number = 0;
+  estimatedArea: number = 0;
 
   constructor(
     private uploadImageService: UploadImageService
@@ -17,6 +20,9 @@ export class UploadCalculateComponent implements OnInit {
     this.uploadImageService.getBinaryImage().subscribe(binaryImage => {
       this.imageSrc = binaryImage;
     });
+    this.uploadImageService.$imageDimensions.subscribe(dimensions => {
+      this.imageDimensions = dimensions;
+    } );
   }
 
   ngOnInit(): void {

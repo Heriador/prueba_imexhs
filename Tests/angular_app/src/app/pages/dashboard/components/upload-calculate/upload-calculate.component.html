@@ -11,5 +11,24 @@
             <img [src]="imageSrc" alt="image" class="image" />
         </div>
     </div>
+
+    <div class="calculate-container">
+        <div class="slider">
+            <div class="slider-info">
+                <label>Number of points to generate</label>
+                <label>{{number_points_generate}}</label>
+            </div>
+            <mat-slider
+                min="0"
+                [max]="imageDimensions.width*imageDimensions.height"
+                [(ngModel)]="number_points_generate"
+            ></mat-slider>
+        </div>
+        <button mat-raised-button color="primary" >Calculate</button>  
+        <div class="estimated-result">
+            <h2>Estimated Area of the Stain: </h2>
+            <p>{{ estimatedArea }} M^2</p>
+        </div>
+    </div>
     
 </div>
