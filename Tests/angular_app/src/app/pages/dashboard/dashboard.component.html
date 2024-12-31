@@ -1,8 +1,11 @@
 <mat-tab-group mat-align-tabs="center" class="dashboard-container" [selectedIndex]="1" >
-    <mat-tab class="tab-content" label="How to use">Content 1</mat-tab>
+    <mat-tab class="tab-content" label="How to use">
+        <app-methodology></app-methodology>
+    </mat-tab>
     <mat-tab class="tab-content" label="Upload and Calculate" [routerLinkActive]="['active']">
-        Content 2
         <app-upload-calculate></app-upload-calculate>
     </mat-tab>
-    <mat-tab class="tab-content" label="History Results">Content 3</mat-tab>
+    <mat-tab class="tab-content" label="History Results">
+        <app-history-result></app-history-result>
+    </mat-tab>
 </mat-tab-group>
