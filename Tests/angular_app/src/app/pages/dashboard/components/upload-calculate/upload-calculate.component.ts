@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Point } from 'src/app/interfaces/point.interface';
-import { UploadCalculateService } from 'src/app/services/upload-calculate/upload-calculate.service';
+import { UploadCalculateService } from '../../../../services/upload-calculate/upload-calculate.service';
 
 @Component({
   selector: 'app-upload-calculate',
