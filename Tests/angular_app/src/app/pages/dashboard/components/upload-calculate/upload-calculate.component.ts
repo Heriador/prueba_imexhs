@@ -20,7 +20,12 @@ export class UploadCalculateComponent implements OnInit {
     private uploadImageService: UploadCalculateService
   ) {
     this.uploadImageService.getBinaryImage().subscribe(binaryImage => {
+      if(this.drawImage !== null){
+        this.drawImage = null;
+      }
       this.imageSrc = binaryImage;
+      this.drawImage = binaryImage;
+      
     });
     this.uploadImageService.$imageDimensions.subscribe(dimensions => {
       this.imageDimensions = dimensions;
