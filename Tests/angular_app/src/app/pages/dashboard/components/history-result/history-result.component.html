@@ -1,0 +1,18 @@
+<div class="table-container">
+  <table class="table">
+    <thead>
+      <tr class="table__header">
+        <th class="table__cell">Number of Points Generated</th>
+        <th class="table__cell">Estimated Area</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="table__row" *ngFor="let result of historyResults">
+        <td class="table__cell">{{ result.number_points }}</td>
+        <td class="table__cell">{{ result.estimated_area | number:'1.2-3' }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
