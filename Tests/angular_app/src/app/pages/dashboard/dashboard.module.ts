@@ -8,11 +8,13 @@ import { MatIconModule } from '@angular/material/icon';
 import { UploadCalculateComponent } from './components/upload-calculate/upload-calculate.component'
 import { MatSliderModule } from '@angular/material/slider'
 import { FormsModule } from '@angular/forms';
+import { HistoryResultComponent } from './components/history-result/history-result.component';
 
 @NgModule({
   declarations: [
     DashboardComponent,
     UploadCalculateComponent,
+    HistoryResultComponent,
   ],
   imports: [
     CommonModule,
