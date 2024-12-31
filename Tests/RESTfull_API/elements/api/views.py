@@ -125,7 +125,7 @@ class ElementViewSet(viewsets.ModelViewSet):
         device.save()
 
         # update the element device id
-        Element.objects.filter(device=old_device_id).update(device=device_data['id'])
+        Element.objects.filter(device=old_device_id).update(device=device.id)
         
         
         serializer = self.get_serializer(instance)
