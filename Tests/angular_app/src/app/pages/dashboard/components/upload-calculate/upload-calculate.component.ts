@@ -63,10 +63,10 @@ export class UploadCalculateComponent implements OnInit {
       }
     });
 
-    this.uploadImageService.countPointsInsideStain(points).subscribe({
-      next: (pointsInsideStain) => {
-        console.log(pointsInsideStain);
-        this.estimatedArea = (pointsInsideStain / this.number_points_generate) * this.imageDimensions.width * this.imageDimensions.height;
+    this.uploadImageService.estimateAreaOfStain(points).subscribe({
+      next: (estimatedArea) => {
+        console.log(estimatedArea);
+        this.estimatedArea = estimatedArea;
 
       },
       error: (error) => {

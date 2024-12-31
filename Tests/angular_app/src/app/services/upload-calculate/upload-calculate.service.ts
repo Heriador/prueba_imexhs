@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, BehaviorSubject } from 'rxjs';
+import { AreaResult } from 'src/app/interfaces/area-result.interface';
 import { Point } from 'src/app/interfaces/point.interface';
 
 @Injectable({
@@ -9,14 +10,18 @@ export class UploadCalculateService {
 
   private binaryImage: BehaviorSubject<string | ArrayBuffer | null> = new BehaviorSubject<string | ArrayBuffer | null>(null);
   private imageDimensions: BehaviorSubject<{ width: number, height: number }> = new BehaviorSubject<{ width: number, height: number }>({ width: 0, height: 0 });
+  private previousAreaResults: BehaviorSubject<AreaResult[]> = new BehaviorSubject<AreaResult[]>([]);
 
   public $imageDimensions = this.imageDimensions.asObservable();
+  public $previousAreaResults = this.previousAreaResults.asObservable();
 
   constructor() { }
 
 
   receiveImage(image: File): void {
     const reader = new FileReader();
+
+    // Convert image to binary
     reader.onload = (e) => {
       const img = new Image();
       img.src = reader.result as string;
@@ -43,7 +48,7 @@ export class UploadCalculateService {
     const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
     const data = imageData.data;
 
-    // Convertir a escala de grises
+    // Convert to grayscale
     for (let i = 0; i < data.length; i += 4) {
       const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
       data[i] = avg;
@@ -51,7 +56,7 @@ export class UploadCalculateService {
       data[i + 2] = avg;
     }
 
-    // Aplicar umbral para convertir a binario
+    // convert to binary
     const threshold = 128;
     for (let i = 0; i < data.length; i += 4) {
       const value = data[i] > threshold ? 255 : 0;
@@ -64,7 +69,7 @@ export class UploadCalculateService {
     return canvas.toDataURL();
   }
 
-  // Observable para obtener la imagen binaria
+  // Observable to get the binary image
   getBinaryImage(): Observable<string | ArrayBuffer | null> {
     return this.binaryImage.asObservable();
   }
@@ -116,7 +121,7 @@ export class UploadCalculateService {
     });
   }
 
-  countPointsInsideStain(points: Point[]): Observable<number> { 
+  estimateAreaOfStain(points: Point[]): Observable<number> { 
     
     return new Observable<number>(observer => {
       let count = 0;
@@ -129,13 +134,19 @@ export class UploadCalculateService {
         return;
       }
 
+      // Wait for image to load
       img.onload = () => {
+
+        // Draw image on canvas
         canvas.width = img.width;
         canvas.height = img.height;
         context.drawImage(img, 0, 0);
 
+        // Get image data
         const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
         const data = imageData.data;
+
+        // Count points inside the stain
         points.forEach(point => {
           const index = (point.y * canvas.width + point.x) * 4;
           if (data[index] === 0) {
@@ -143,7 +154,13 @@ export class UploadCalculateService {
           }
         });
 
-        observer.next(count);
+        // Calculate estimated area
+        const estimatedArea = (count / points.length) * canvas.width * canvas.height;
+
+        // add result to previous results
+        const previousResults = this.previousAreaResults.value;
+        previousResults.push({ number_points: points.length, estimated_area: estimatedArea });
+        observer.next(estimatedArea);
         observer.complete();
       }
     });
