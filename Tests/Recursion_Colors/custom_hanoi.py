@@ -1,49 +1,45 @@
+def hanoi_with_colors(n, disks, source, target, auxiliary):
+    moves = []
 
+    def move_disks(num_disks, src, tgt, aux, src_stack, tgt_stack, aux_stack):
+        if num_disks == 0:
+            return
 
+        # Move n-1 disks from source to auxiliary, using target as auxiliary
+        move_disks(num_disks - 1, src, aux, tgt, src_stack, aux_stack, tgt_stack)
 
-# def solve_hanoi(n, disks, source, target, auxiliary):
-#     if n == 0:
-#         return print(f'{disks[n]} from {source} to {target}');
+        # Get the current disk to move
+        disk = src_stack.pop()
 
-def hanoi_with_colors(n, disks, source, target, auxiliary, moves):
-    if n == 0:
+        # Ensure that the target rod rules are satisfied
+        if tgt_stack and (tgt_stack[-1][0] < disk[0] or tgt_stack[-1][1] == disk[1]):
+            raise ValueError(f"Disk {disk} cannot be placed on {tgt_stack[-1]}")
+
+        tgt_stack.append(disk)
+        moves.append((disk, src, tgt))
+
+        # Move n-1 disks from auxiliary to target, using source as auxiliary
+        move_disks(num_disks - 1, aux, tgt, src, aux_stack, tgt_stack, src_stack)
+
         return True
 
-    # Mover n-1 discos de source a auxiliary
-    if not hanoi_with_colors(n-1, disks[:-1], source, auxiliary, target, moves):
-        return False
+    # Create stacks for each rod
+    source_stack = disks.copy()
+    target_stack = []
+    auxiliary_stack = []
 
-    # Mover el disco n de source a target
-    if target and disks[-1][1] == target[-1][1]:
-        return False  # No se puede mover porque el color es el mismo
-    if source:
-        disk = source.pop()
-        target.append(disk)
-        moves.append((disk[0], "A", "C"))
+    move_disks(n, source, target, auxiliary, source_stack, target_stack, auxiliary_stack)
 
-    # Mover n-1 discos de auxiliary a target
-    if not hanoi_with_colors(n-1, disks[:-1], auxiliary, target, source, moves):
-        return False
+    return moves
 
-    return True
+if __name__ == "__main__":
 
-def solve_hanoi(n, disks):
-    source = disks[:]
-    target = []
-    auxiliary = []
-    moves = []
-    print(source)
-    if hanoi_with_colors(n, disks, source, target, auxiliary, moves):
-        return moves
-    else:
-        return -1
-
-
-
-        
-
-if __name__ == '__main__':
-    n = 3;
-    disks = [(3, 'red'), (2, 'green'), (1, 'blue')];
-    result = solve_hanoi(n, disks)
-    print(result)
+    disks = [(4,'blue'),(3, "red"), (2, "green"), (1, "red")]
+  
+    # Solve the problem and display the moves
+    try:
+        result = hanoi_with_colors(len(disks), disks, "A", "C", "B")
+        for move in result:
+            print(f"Move disk {move[0]} from {move[1]} to {move[2]}")
+    except ValueError as e:
+        print(e)
